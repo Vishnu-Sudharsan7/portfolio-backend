@@ -45,6 +45,8 @@ const itemSchema = new mongoose.Schema({
   Company_name: String,
   About_the_role: String,
   link1: String,
+  git_link:String,
+  linkedin:String
 });
 
 const Item = mongoose.model('Details', itemSchema);
@@ -77,6 +79,8 @@ const insertSampleData = () => {
       About_the_role:
         'I had a great experience as an Intern at Soulocal. I was working in various roles which includes application development and product management. I got a chance to improve my programming and management skills. I got a chance to lay hands on deployed projects where I could see my works in action. Soulocal was a great place for me to explore new techs and start my new journey as an application developer.',
       link1: 'https://play.google.com/store/apps/details?id=com.soulocal.customer',
+      git_link:'',
+      linkedin:''
     },
   ];
 
@@ -121,6 +125,50 @@ app.post('/signup', (req, res) => {
     });
 });
 
+
+
+app.post('/port_details', (req, res) => {
+  const { name, description, mail, about, projects, education, year_of_exp, project1_title, project2_title, project3_title, project1_desciption, project2_desciption, project3_desciption, company_name, about_the_role, link1,  git_link, linkedin, frontend, backend } = req.body;
+
+  const updateData = {
+    name: name,
+    description: description,
+    About: about,
+    area_of_interest: {
+      frontend: frontend,
+      backend: backend,
+    },
+    Projects: projects,
+    Years_of_Experience: year_of_exp,
+    Education: education,
+    Project1_title: project1_title,
+    Project1_description: project1_desciption,
+    Project2_title: project2_title,
+    Project2_description: project2_desciption,
+    Project3_title: project3_title,
+    Project3_description: project3_desciption,
+    Company_name: company_name,
+    About_the_role: about_the_role,
+    link1: link1,
+    git_link: git_link,
+    linkedin: linkedin,
+  };
+
+
+  
+
+  Item.updateMany({ email: mail }, { $set: updateData })
+    .then((result) => {
+      if (result.modifiedCount > 0) {
+        console.log('Sample data updated successfully');
+      } else {
+        console.log('No matching data found');
+      }
+    })
+    .catch((error) => {
+      console.error('Error updating data:', error);
+    });
+});
 
 
 
