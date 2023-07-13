@@ -126,47 +126,65 @@ app.post('/signup', (req, res) => {
 });
 
 
-
 app.post('/port_details', (req, res) => {
-  const { name, description, mail, about, projects, education, year_of_exp, project1_title, project2_title, project3_title, project1_desciption, project2_desciption, project3_desciption, company_name, about_the_role, link1,  git_link, linkedin, frontend, backend } = req.body;
+  const {
+    name, description, mail, about, projects, education, year_of_exp,
+    project1_title, project2_title, project3_title,
+    project1_desciption, project2_desciption, project3_desciption,
+    company_name, about_the_role, link1, git_link, linkedin,
+    frontend, backend
+  } = req.body;
 
-  const updateData = {
-    name: name,
-    description: description,
-    About: about,
-    area_of_interest: {
-      frontend: frontend,
-      backend: backend,
-    },
-    Projects: projects,
-    Years_of_Experience: year_of_exp,
-    Education: education,
-    Project1_title: project1_title,
-    Project1_description: project1_desciption,
-    Project2_title: project2_title,
-    Project2_description: project2_desciption,
-    Project3_title: project3_title,
-    Project3_description: project3_desciption,
-    Company_name: company_name,
-    About_the_role: about_the_role,
-    link1: link1,
-    git_link: git_link,
-    linkedin: linkedin,
-  };
-
-
-  
-
-  Item.updateMany({ email: mail }, { $set: updateData })
-    .then((result) => {
-      if (result.modifiedCount > 0) {
-        console.log('Sample data updated successfully');
-      } else {
+  Item.findOne({ email: mail })
+    .then((existingData) => {
+      if (!existingData) {
         console.log('No matching data found');
+        return res.status(401).send('Enter your registered E-mail');
       }
+
+      // Merge existing data with new data
+      const updatedData = {
+        name: name || existingData.name,
+        description: description || existingData.description,
+        About: about || existingData.About,
+        area_of_interest: {
+          frontend: frontend || existingData.area_of_interest.frontend,
+          backend: backend || existingData.area_of_interest.backend,
+        },
+        Projects: projects || existingData.Projects,
+        Years_of_Experience: year_of_exp || existingData.Years_of_Experience,
+        Education: education || existingData.Education,
+        Project1_title: project1_title || existingData.Project1_title,
+        Project1_description: project1_desciption || existingData.Project1_description,
+        Project2_title: project2_title || existingData.Project2_title,
+        Project2_description: project2_desciption || existingData.Project2_description,
+        Project3_title: project3_title || existingData.Project3_title,
+        Project3_description: project3_desciption || existingData.Project3_description,
+        Company_name: company_name || existingData.Company_name,
+        About_the_role: about_the_role || existingData.About_the_role,
+        link1: link1 || existingData.link1,
+        git_link: git_link || existingData.git_link,
+        linkedin: linkedin || existingData.linkedin,
+      };
+
+      Item.updateOne({ email: mail }, { $set: updatedData })
+        .then((result) => {
+          if (result.nModified > 0) {
+            console.log('Data updated successfully');
+            res.send('Data updated successfully');
+          } else {
+            console.log('No modifications made');
+            res.send('No modifications made');
+          }
+        })
+        .catch((error) => {
+          console.error('Error updating data:', error);
+          res.status(500).send('An error occurred');
+        });
     })
     .catch((error) => {
-      console.error('Error updating data:', error);
+      console.error('Error retrieving existing data:', error);
+      res.status(500).send('An error occurred');
     });
 });
 
